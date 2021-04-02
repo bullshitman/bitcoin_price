@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'coin_data.dart';
 
 class PriceScreen extends StatelessWidget {
   @override
@@ -38,7 +39,10 @@ class PriceScreen extends StatelessWidget {
             height: 150.0,
             alignment: Alignment.center,
             padding: EdgeInsets.only(bottom: 30.0),
-            child: Text('some_text'),
+            child: DropdownButton<String>(
+              items: [],
+              onChanged: null,
+            ),
           ),
         ],
       ),
