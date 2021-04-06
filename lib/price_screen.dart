@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'coin_data.dart';
 import 'dart:io' show Platform;
+import 'widgets/crypto_card.dart';
 
 class PriceScreen extends StatefulWidget {
   @override
@@ -10,12 +11,9 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
-  List<String> cryproList = ['BTC', 'LTC', 'ETH'];
   String selectedCurrency = 'USD';
-  String btcRate = '? USD';
-  String ltcRate = '? USD';
-  String ethRate = '? USD';
-  Currency currency = Currency();
+
+  Map<String, String> currency = {};
 
   //IOS
   CupertinoPicker IOSPicker() {
@@ -31,7 +29,7 @@ class _PriceScreenState extends State<PriceScreen> {
         setState(() {
           selectedCurrency = currenciesList[selectedIndex];
         });
-        getRate(cryptoList, selectedCurrency);
+        getRate();
       },
       children: pickerList,
     );
@@ -55,44 +53,22 @@ class _PriceScreenState extends State<PriceScreen> {
         setState(() {
           selectedCurrency = value;
         });
-        getRate(cryptoList, selectedCurrency);
+        getRate();
       },
     );
   }
 
-  void getRate(List cryptoList, String curr) async {
-    for (String cryptoCurr in cryproList) {
-      currency = await Currency().getCurrencyRate(cryptoCurr, curr);
-      updateUI(currency);
-    }
-  }
-
-  void updateUI(Currency currency) {
+  void getRate() async {
+    var response = await Currency().getCurrencyRate(selectedCurrency);
     setState(() {
-      if (currency != null) {
-        switch (currency.assetIdBase) {
-          case ('BTC'):
-            btcRate = '${currency.rate.toStringAsFixed(3)} $selectedCurrency';
-            break;
-          case ('ETH'):
-            ethRate = '${currency.rate.toStringAsFixed(3)} $selectedCurrency';
-            break;
-          case ('LTC'):
-            ltcRate = '${currency.rate.toStringAsFixed(3)} $selectedCurrency';
-            break;
-        }
-      } else {
-        btcRate = '? $selectedCurrency';
-        ltcRate = '? $selectedCurrency';
-        ethRate = '? $selectedCurrency';
-      }
+      currency = response;
     });
   }
 
   @override
   void initState() {
     super.initState();
-    getRate(cryproList, 'USD');
+    getRate();
   }
 
   @override
@@ -105,70 +81,7 @@ class _PriceScreenState extends State<PriceScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 18.0),
-            child: Column(
-              children: [
-                Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  color: Colors.lightBlue,
-                  elevation: 5.0,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 15.0, horizontal: 28.0),
-                    child: Text(
-                      '1 BTC = $btcRate',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-                Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  color: Colors.lightBlue,
-                  elevation: 5.0,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 15.0, horizontal: 28.0),
-                    child: Text(
-                      '1 LTC = $ltcRate',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-                Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  color: Colors.lightBlue,
-                  elevation: 5.0,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 15.0, horizontal: 28.0),
-                    child: Text(
-                      '1 ETH = $ethRate',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          cardCreator(),
           Container(
             color: Colors.lightBlue,
             height: 150.0,
@@ -178,6 +91,20 @@ class _PriceScreenState extends State<PriceScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Column cardCreator() {
+    List<Widget> cryptoCards = [];
+    for (String crypto in cryptoList) {
+      cryptoCards.add(CryptoCurrencyCard(
+          cryptoName: crypto,
+          rate: currency[crypto],
+          currName: selectedCurrency));
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: cryptoCards,
     );
   }
 }

@@ -1,24 +1,24 @@
+import 'dart:convert';
+
 import 'package:bitcoin_price/network/network_helper.dart';
 import 'package:bitcoin_price/consts.dart';
+import 'package:bitcoin_price/coin_data.dart';
 
 class Currency {
-  String time;
-  String assetIdBase;
-  String assetIdQuote;
-  double rate;
-
-  Currency({this.time, this.assetIdBase, this.assetIdQuote, this.rate});
-
-  Currency.fromJson(Map<String, dynamic> json) {
-    time = json['time'];
-    assetIdBase = json['asset_id_base'];
-    assetIdQuote = json['asset_id_quote'];
-    rate = json['rate'];
-  }
-  Future<Currency> getCurrencyRate(String cryptoCurr, String curr) async {
-    NetWorkHelper netWorkHelper =
-        NetWorkHelper('$baseUrl$cryptoCurr/$curr?apikey=$apiK');
-    var data = await netWorkHelper.getData();
-    return Currency.fromJson(data);
+  Future<Map<String, String>> getCurrencyRate(String curr) async {
+    Map<String, String> cryptoRate = {};
+    for (String crypto in cryptoList) {
+      NetWorkHelper netWorkHelper =
+          NetWorkHelper('$baseUrl$crypto/$curr?apikey=$apiK');
+      var response = await netWorkHelper.getData();
+      if (response.statusCode == 200) {
+        print('Response ${response.body}');
+        cryptoRate[crypto] = jsonDecode(response.body)['rate'];
+      } else {
+        cryptoRate[crypto] = '?';
+        print(response.statusCode);
+      }
+    }
+    return cryptoRate;
   }
 }
