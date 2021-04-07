@@ -13,7 +13,7 @@ class PriceScreen extends StatefulWidget {
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
 
-  Map<String, String> currency = {};
+  Map<String, String> cryptoRates = {};
 
   //IOS
   CupertinoPicker IOSPicker() {
@@ -61,7 +61,7 @@ class _PriceScreenState extends State<PriceScreen> {
   void getRate() async {
     var response = await Currency().getCurrencyRate(selectedCurrency);
     setState(() {
-      currency = response;
+      cryptoRates = response;
     });
   }
 
@@ -99,7 +99,7 @@ class _PriceScreenState extends State<PriceScreen> {
     for (String crypto in cryptoList) {
       cryptoCards.add(CryptoCurrencyCard(
           cryptoName: crypto,
-          rate: currency[crypto],
+          rate: cryptoRates[crypto],
           currName: selectedCurrency));
     }
     return Column(
